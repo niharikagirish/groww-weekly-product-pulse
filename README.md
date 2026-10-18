@@ -1,25 +1,34 @@
 # Groww Weekly Product Pulse
 
-## 1. How to Run
+An AI-powered n8n workflow that analyses public Groww app reviews, generates a weekly product pulse, verifies fee information against official sources, and prepares follow-up actions subject to human approval.
 
-1. Import `workflows/GROWW Weekly Product Pulse.json` into n8n.
-2. Import `workflows/MCP server.json` as a separate workflow.
-3. Configure the required credentials for the AI model, Gmail and Google Drive/Docs.
-4. Publish the MCP server workflow and configure its Production URL in the main workflow's MCP Client node.
-5. Provide the Groww reviews CSV and ensure the official-source retrieval nodes are configured.
-6. Execute the main workflow and review the generated report.
-7. Approve or reject the proposed actions through the approval email.
-8. After approval, verify the Google Doc update and Gmail draft creation. The customer-facing email is saved as a draft and is not sent automatically.
+## How to Run
 
-## 2. Where MCP Approval Happens
+1. Import the [main workflow](workflows/GROWW%20Weekly%20Product%20Pulse.json) and [MCP server workflow](workflows/MCP%20server.json) into n8n.
+2. Configure AI, Gmail, and Google Docs credentials, then publish the MCP server and configure its Production URL in the main workflow.
+3. Submit the Groww reviews CSV and execute the main workflow.
+4. Review the report and approve or reject the proposed actions through the approval email.
+5. After approval, verify the Google Docs update and Gmail draft. The customer-facing draft is not sent automatically.
 
-Human approval happens in the Gmail **Send message and wait for response** node. The `Approved?` IF node checks the response.
+## Where MCP Approval Happens
 
-- **Approved:** the workflow proceeds to the MCP Client and attempts the configured Google Docs update and Gmail draft creation.
-- **Rejected:** the workflow follows the rejection branch, and the approved actions should not execute.
+Human approval occurs in the Gmail **Send message and wait for response** node. The **Approved?** IF node routes execution based on the response. Only the approved branch proceeds to the MCP Client actions.
 
-## 3. Fee Issue Identified from Reviews
+## Fee Issue Identified
 
-Multiple Groww reviews express concerns about high or unclear charges, including an allegation of duplicate brokerage: *“ब्रोकरेज चार्ज 2 बार लेता है”* (“It charges brokerage twice”).
+Multiple reviews report concerns about high or unclear charges, including an allegation of duplicate brokerage. These are customer-reported concerns, not verified charging errors.
 
-These reviews indicate a recurring perception of fee-transparency problems. They do not independently establish that a particular charge was applied incorrectly. The fee explanation is checked against the official Groww sources listed in [`sources.md`](sources.md).
+Fee information is checked against:
+- [Groww Pricing](https://groww.in/pricing)
+- [Groww Help Centre: Fees and Charges](https://groww.in/help/payments-&-withdrawals/payments-charges/what-fees-does-groww-charge--58)
+
+## Project Outputs
+
+- [Weekly Product Pulse](outputs/weekly-product-pulse.md)
+- [Email Draft](outputs/email-draft.md)
+- [Notes/Doc Entry](outputs/notes-doc-entry.md)
+- [Source List](sources.md)
+
+## Limitations
+
+Findings depend on the supplied review sample and date coverage. Customer allegations require independent verification, and official fee policies should be rechecked before customer-facing use.
