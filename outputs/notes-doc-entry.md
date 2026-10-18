@@ -46,6 +46,7 @@ Verified Fee Explanation (policy bullets):
 
 Official Sources:
 https://groww.in/pricing
+
 https://groww.in/help/payments-&-withdrawals/payments-charges/what-fees-does-groww-charge--58
 
 Last checked: 2026-10-18
