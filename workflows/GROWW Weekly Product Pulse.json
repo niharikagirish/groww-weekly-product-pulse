@@ -1,0 +1,719 @@
+{
+  "name": "GROWW Weekly Product Pulse",
+  "nodes": [
+    {
+      "parameters": {
+        "binaryPropertyName": "=Groww_Reviews_CSV",
+        "options": {
+          "enableBOM": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -384,
+        112
+      ],
+      "id": "28995382-6eb2-444f-8b65-96326ff48ca0",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "formTitle": "Groww Customer Reviews — Product Pulse",
+        "formDescription": "Upload a CSV of public Groww Google Play Store reviews for analysis. The workflow will identify customer feedback themes, extract supporting quotes, prepare a weekly product pulse, and investigate recurring fee-related confusion using official Groww sources.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Groww Reviews CSV",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -624,
+        112
+      ],
+      "id": "2a4f37ad-0b1a-4ba5-949e-8600af4205d3",
+      "name": "On form submission",
+      "webhookId": "1c2406a4-133f-4bd3-8c7b-abed7ca5cb68"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        272
+      ],
+      "id": "620ce9a2-20d6-4a93-acfc-b7a5216809fb",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "reviews",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        112
+      ],
+      "id": "bb50830a-fdd6-427a-81ff-2f8076cd4341",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1e362588-a845-4498-a040-dbde9f2a406c",
+              "name": "=weekly_pulse",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        368,
+        352
+      ],
+      "id": "408cbc4f-0404-4d2c-ae2d-83b29283d632",
+      "name": "Prepare product pulse"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are preparing a weekly product pulse for the Groww product team using the supplied customer-review analysis.\n\nSTRICT LIMIT: The complete weekly product pulse must be no more than 250 words, including headings and quotations. Aim for 200 words. Count the words before returning the answer.\n\nUse exactly these sections:\n\n1. **Top 3 Themes:** Three leading themes supported by the review evidence. Include counts only if available.\n2. **Supporting Quotes:** Exactly three short, verbatim customer-review quotes.\n3. **Key Observation:** One important recurring pattern supported by the evidence.\n4. **Three Action Ideas:** Exactly three concise, actionable suggestions tied to the findings. Label hypotheses clearly.\n\nDo not invent findings, quotes, counts, or trends. If evidence is insufficient, state the limitation.\n\nReturn only the finished product pulse. Do not include a fee explainer, official webpage content, raw HTML, source links, introductions, or closing remarks.\nFormatting rules:\n- Use plain text only; do not use Markdown.\n- Do not use asterisks around headings.\n- Use simple numbered headings and hyphen bullets.\n- Keep the output concise and readable in a plain-text email.\n- Preserve all customer review quotes exactly as provided.\n\nReview analysis:\n{{ $('Analyse Groww Reviews').first().json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        656,
+        352
+      ],
+      "id": "989e5eff-d22d-48c9-96c3-b9198e53c95b",
+      "name": "Generate Weekly Product Pulse"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        560
+      ],
+      "id": "af2d73c7-24d2-486d-a244-9039fb476f60",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are preparing a concise, factual fee explainer for users of the Groww investment app.\n\nUse the supplied customer-review analysis and official-source material.\n\nReturn exactly these four sections:\n\n**1. Identified fee-related issue**\nIn 2–3 sentences, describe the recurring fee confusion only if multiple reviews support it. Include brief evidence from the reviews. If no recurring issue is substantiated, explicitly say so.\n\n**2. Verified fee policy**\nProvide no more than 6 concise bullet points. Include only policies directly supported by the official-source material. Distinguish customer allegations from verified policy. Do not invent amounts, conditions, or exemptions.\n\n**3. Official sources**\nInclude exactly these two URLs:\nhttps://groww.in/pricing\nhttps://groww.in/help/payments-&-withdrawals/payments-charges/what-fees-does-groww-charge--58\n\n**4. Last checked**\nLast checked: {{ $now.toISODate() }}\n\nSTRICT OUTPUT RULES:\n- Maximum 180 words for the entire response.\n- Do not reproduce HTML, JSON, page metadata, navigation, footer text, menus, or raw source extracts.\n- Do not repeat bullet points or include nested copies of the same content.\n- Do not add an introduction, conclusion, or suggestions.\n- Use only evidence in the supplied inputs. If a policy cannot be verified, state that it could not be verified.\n\nFormatting rules:\n- Use plain text only, without Markdown.\n- Do not use asterisks around headings or bullet points.\n- Use simple numbered headings and hyphen bullets.\n- Keep the explanation concise and readable in a plain-text email.\n- Preserve official URLs exactly as supplied.\n- Do not include raw webpage text or duplicate the source material.\n\nCUSTOMER-REVIEW ANALYSIS:\n{{ $('Analyse Groww Reviews').first().json.text }}\n\nOFFICIAL-SOURCE MATERIAL:\n{{ $('Strip & Merge Sources').first().json.official_source_material }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "a28672b0-fe22-4ad4-8cf3-7412c49ffca3",
+      "name": "Generate Fee Explainer"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        160
+      ],
+      "id": "47499d05-df2c-4950-8d86-9dd86faed712",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c947ffec-f7ff-4586-884e-255ae337b7a4",
+              "name": "=date",
+              "value": "={{ $now.toISODate() }}",
+              "type": "string"
+            },
+            {
+              "id": "5a573cc5-0310-478e-af3e-4137728fad87",
+              "name": "=top_themes",
+              "value": "={{ $('Analyse Groww Reviews').first().json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "5dbf5750-7cc8-419b-8eb4-e3020eadadd7",
+              "name": "weekly_pulse",
+              "value": "={{ $('Generate Weekly Product Pulse').first().json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "bfa72386-7624-4569-9c64-4c6ad5d9107a",
+              "name": "identified_fee_issue",
+              "value": "={{ $('Generate Fee Explainer').first().json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "a6a5c99f-6a85-4906-a1df-52eaabd3997d",
+              "name": "explanation_bullets",
+              "value": "={{ $('Generate Fee Explainer').first().json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "ac3e7586-06c5-47fc-9a6a-259a30805ed9",
+              "name": "source_links",
+              "value": "={{ 'https://groww.in/pricing\\nhttps://groww.in/help/payments-&-withdrawals/payments-charges/what-fees-does-groww-charge--58' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1296,
+        96
+      ],
+      "id": "d0c774b4-9209-4ab3-9b30-1e8e51bb3ae8",
+      "name": "Assemble Final Report"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "niharibvg22@gmail.com",
+        "subject": "=Approval Required — Groww Weekly Product Pulse — {{ $now.toISODate() }}",
+        "message": "=Hi,\n\nPlease review the Groww customer-review analysis below and approve or reject the proposed actions.\n\nA. Weekly Product Pulse\n\n{{ $('Generate Weekly Product Pulse').first().json.text }}\n\nB. Identified Fee-Related Issue and Fee Explainer\n\n{{ $('Generate Fee Explainer').first().json.text }}\n\nC. Proposed actions after approval\n\n1. Append the report to the designated Google Drive document with the required fields: date, top_themes, weekly_pulse, identified_fee_issue, explanation_bullets and source_links.\n2. Create a Gmail draft with the subject: Weekly Product Pulse + Customer Clarification — {{ $now.toISODate() }}.\n\nThe customer-facing email will be saved as a draft and will **not** be sent automatically.\n\nPlease approve only after reviewing the evidence, customer quotations, fee explanation and official sources.\n\nReport date: {{ $now.toISODate() }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "disapproveLabel": "Reject"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1536,
+        96
+      ],
+      "id": "8d3031be-65d2-47e3-b9a0-f036638e4f25",
+      "name": "Send message and wait for response",
+      "webhookId": "09c057f6-d7ad-430e-a046-02b7b46893ba",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9uTqw8OSuhA3smqP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b0a12caa-7e68-4ff9-8179-f74a007f0860",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "={{ $json.data.approved }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1744,
+        96
+      ],
+      "id": "6d187f3d-b0d1-4159-b8bd-f32d0a0b5d2b",
+      "name": "Approved?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a product analyst analysing public customer reviews of the Groww investment app.\n\nAnalyse the complete supplied review dataset. Use only evidence present in the reviews. Do not invent review counts, themes, quotations, customer complaints or fee-related issues.\n\nReturn the following structured report:\n\n1. **Dataset:** State the number of reviews actually supplied. Note the date coverage only if the dates are available.\n2. **Review themes:** Identify no more than five distinct themes. Rank the top three by frequency when the data supports counting. Do not invent counts.\n3. **Three real user quotes:** Extract three exact, verbatim review excerpts that illustrate the findings. Preserve the original wording and associate ratings or dates where available. Never fabricate or paraphrase a quote while presenting it as verbatim.\n4. **Recurring fee/charge confusion:** Identify a recurring issue only if multiple reviews provide supporting evidence. Explain the confusion, show the supporting evidence and distinguish the customer's perception from verified fee policy.\n5. **Evidence and limitations:** Explain which findings are well supported, which are tentative, and any sampling or date-coverage limitations.\n\nDo not generate product recommendations or a fee explainer at this stage. Do not assume that every negative review is a fee complaint.\n\nIf the supplied reviews do not establish a recurring fee-related issue, explicitly say so. Do not manufacture an issue to satisfy the requested output.\n\nKeep the report structured and concise.\n\nCustomer reviews:\n{{ JSON.stringify($json.reviews) }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        16,
+        112
+      ],
+      "id": "e539cb53-15e7-4655-8a88-bb4eb24689e3",
+      "name": "Analyse Groww Reviews"
+    },
+    {
+      "parameters": {
+        "url": "=https://groww.in/pricing",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        352,
+        -240
+      ],
+      "id": "a0c50576-0c88-400c-935e-b4b5f7172bfe",
+      "name": "Fetch Official Page 1"
+    },
+    {
+      "parameters": {
+        "url": "=https://groww.in/help/payments-%26-withdrawals/payments-charges/what-fees-does-groww-charge--58",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        592,
+        -240
+      ],
+      "id": "22f67fd3-5d46-43e6-b637-5f808ba57ceb",
+      "name": "Fetch Official Page 2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        96
+      ],
+      "id": "e65220ce-2118-4f82-baae-86bc676c0686",
+      "name": "Merge Final Outputs"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d9ffecac-2286-4b99-9dba-e697ff1d2191",
+              "name": "official_source_material",
+              "value": "={{ $input.all().map((item, i) => {\n  const html = item.json.data || '';\n  const title = i === 0 ? 'Groww pricing page' : 'Groww fee help page';\n  const titleMatch = html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\n  const pageTitle = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : title;\n  const mainMatch = html.match(/<main[^>]*>([\\s\\S]*?)<\\/main>/i);\n  const articleMatch = html.match(/<article[^>]*>([\\s\\S]*?)<\\/article>/i);\n  let content = (mainMatch || articleMatch || [null, html])[1];\n  content = content\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n    .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n    .replace(/<nav[\\s\\S]*?<\\/nav>/gi, ' ')\n    .replace(/<footer[\\s\\S]*?<\\/footer>/gi, ' ')\n    .replace(/<header[\\s\\S]*?<\\/header>/gi, ' ')\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/&nbsp;|&#160;/gi, ' ')\n    .replace(/&amp;/gi, '&')\n    .replace(/&quot;/gi, '\"')\n    .replace(/&#8377;|&#x20b9;/gi, '₹')\n    .replace(/&[^;\\s]+;/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n  content = content.split(/for a detailed breakdown of fees/i)[0].trim();\n  return pageTitle + '\\n' + content.slice(0, 5000);\n}).join('\\n\\n---\\n\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        816,
+        -240
+      ],
+      "id": "c0a67075-30ed-4a04-90da-5503773acb8c",
+      "name": "Strip & Merge Sources"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ff0fa4d5-6ebd-4eae-9889-5d3e759f6818",
+              "name": "status",
+              "value": "rejected",
+              "type": "string"
+            },
+            {
+              "id": "6a1c0a42-7bf6-43cc-b4f7-c8f8c3c30e30",
+              "name": "=date",
+              "value": "={{ $now.toISODate() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1984,
+        400
+      ],
+      "id": "ccc3aebf-8045-447c-80dc-02a7fef0a04e",
+      "name": "Approval Rejected"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        112
+      ],
+      "id": "9d34676a-c8d5-4971-9a0f-b34987c41b53",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an execution agent for the Groww Weekly Product Pulse workflow.\n\nThe report has already been analysed, assembled, and approved by a human. Your job is to execute the available MCP tools using the report data supplied in the current workflow input.\n\nInstructions:\n1. Read the supplied report data carefully.\n2. Use the available MCP tools to perform the requested actions:\n   - Create a Gmail draft with the subject: Weekly Product Pulse + Customer Clarification — [report date].\n   - Include the Weekly Product Pulse, identified fee-related issue, verified fee-explanation bullets, official source links, and a reusable customer-support response in the draft body.\n   - Update the designated report document only if the appropriate document tool is available and its input requirements are satisfied.\n3. Use only values provided in the input. Do not invent report findings, quotations, fee policies, or source links.\n4. Never send an email. Create a draft only.\n5. Do not claim an action succeeded unless the tool returns a successful result.\n6. If a tool fails, report the specific failure and do not claim completion.\n7. Return a concise execution summary identifying which actions succeeded and which failed.\n\nReport data:\n{{ JSON.stringify($('Assemble Final Report').first().json) }}",
+        "options": {
+          "systemMessage": "You are the approval-gated action agent for the Groww Weekly Product Pulse workflow.\n\nUse only the report data provided in the user message. Execute the requested actions only when the report has been approved by the upstream approval gate.\n\n1. Update the designated Google Drive document with the report date, top themes, weekly product pulse, identified fee-related issue, explanation bullets, and official source links. Preserve existing content wherever possible.\n2. Create a Gmail draft with the subject \"Weekly Product Pulse + Customer Clarification — [report date]\".\n3. Include the weekly pulse, fee explanation, official source links, and a reusable customer-support response in the draft.\n4. Never send an email.\n5. Do not invent findings or claim an action succeeded unless the tool confirms it.\n6. If data is missing or a tool fails, report the limitation clearly.\n\nUse only the connected MCP tools for these actions. Return a concise status of the document update and draft creation."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1952,
+        -112
+      ],
+      "id": "cbb24ac0-d3be-4567-a0e8-c1d1fa35f9ab",
+      "name": "Execute Approved Product Pulse Actions"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://niharikagirish.app.n8n.cloud/mcp/42b7074d-90be-4125-bc03-93ff3b519193",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.4,
+      "position": [
+        2096,
+        208
+      ],
+      "id": "b789f8cf-a23b-476d-abd4-f912817464e6",
+      "name": "MCP Client"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyse Groww Reviews",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Analyse Groww Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare product pulse": {
+      "main": [
+        [
+          {
+            "node": "Generate Weekly Product Pulse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Weekly Product Pulse",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Weekly Product Pulse": {
+      "main": [
+        [
+          {
+            "node": "Merge Final Outputs",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Fee Explainer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Fee Explainer": {
+      "main": [
+        [
+          {
+            "node": "Merge Final Outputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Final Report": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyse Groww Reviews": {
+      "main": [
+        [
+          {
+            "node": "Fetch Official Page 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare product pulse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Official Page 1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Official Page 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Official Page 2": {
+      "main": [
+        [
+          {
+            "node": "Strip & Merge Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Final Outputs": {
+      "main": [
+        [
+          {
+            "node": "Assemble Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Execute Approved Product Pulse Actions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Approval Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Strip & Merge Sources": {
+      "main": [
+        [
+          {
+            "node": "Generate Fee Explainer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Execute Approved Product Pulse Actions",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Approved Product Pulse Actions": {
+      "main": [
+        []
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Execute Approved Product Pulse Actions",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "416af4e5-f409-4e99-97c7-14ea0e47667f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3bd6ce18b4bd89ee519e1ec30e0bd70ab0eacf8b379539b75b0ff1679bf5da23"
+  },
+  "nodeGroups": [],
+  "id": "lV46C6AWK24ZRwEM",
+  "tags": []
+}

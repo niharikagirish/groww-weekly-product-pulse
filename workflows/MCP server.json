@@ -1,0 +1,108 @@
+{
+  "name": "MCP server",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "42b7074d-90be-4125-bc03-93ff3b519193"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f045dcad-cf68-401a-8d41-28d47e41a478",
+      "name": "MCP Server Trigger",
+      "webhookId": "42b7074d-90be-4125-bc03-93ff3b519193"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Weekly Product Pulse + Customer Clarification — {{ $now.toISODate() }}",
+        "message": "=WEEKLY PRODUCT PULSE — GROWW\n\nReport date: {{ $now.toISODate() }}\n\nTOP CUSTOMER THEMES\n{{ $fromAI('top_themes', 'Top three customer review themes, with evidence', 'string') }}\n\nWEEKLY PRODUCT PULSE\n{{ $fromAI('weekly_pulse', 'Weekly product pulse under 250 words, including exact review quotes and three action ideas', 'string') }}\n\nIDENTIFIED FEE-RELATED ISSUE\n{{ $fromAI('identified_fee_issue', 'Evidence-supported recurring fee issue, or state that none was substantiated', 'string') }}\n\nVERIFIED FEE EXPLANATION\n{{ $fromAI('explanation_bullets', 'Neutral fee explanation with no more than six factual bullets', 'string') }}\n\nOFFICIAL SOURCES\n{{ $fromAI('source_links', 'Two relevant official Groww source URLs', 'string') }}\n\nLast checked:{{ $now.toISODate() }}\n\n---\n\nREUSABLE CUSTOMER-SUPPORT RESPONSE\n\nHi,\n\nThank you for sharing your concern with us. We understand that charges and fees can sometimes be unclear. Please refer to the official Groww resources above for the applicable charges and conditions.\n\nIf you share the specific transaction or charge you are referring to, our support team can help clarify how it applies to your account.\n\nRegards,\nGroww Support Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        224
+      ],
+      "id": "9b046bce-51dc-4f81-9878-822dd1d8d785",
+      "name": "Create a draft in Gmail",
+      "webhookId": "d44f7ade-982e-408c-908b-e6e700143d57",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9uTqw8OSuhA3smqP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "https://docs.google.com/document/d/1rwWOLGzlzqwV_coF6wCVhf6PginC_oYT_-LsUTC6rxE/edit?tab=t.0",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Old_Text', `The full draft text to write into the document`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        272,
+        208
+      ],
+      "id": "db720d47-cc3d-4e93-8dc7-0bd0be3bd881",
+      "name": "Update a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "08j0wBBupqACReXs",
+          "name": "Google Docs account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create a draft in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f0f14a33-d34f-4f22-b1d7-74b96f797405",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3bd6ce18b4bd89ee519e1ec30e0bd70ab0eacf8b379539b75b0ff1679bf5da23"
+  },
+  "nodeGroups": [],
+  "id": "W4t7p5UOatuIquIR",
+  "tags": []
+}
