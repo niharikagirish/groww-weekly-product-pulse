@@ -46,10 +46,12 @@ VERIFIED FEE EXPLANATION
 - Regulatory/statutory/exchange fees and penalties are imposed by exchanges/government and are not charged by Groww; customer allegations of duplicate or unexplained charges are not verified by the official policy.
 
 OFFICIAL SOURCES
+
 https://groww.in/pricing
+
 https://groww.in/help/payments-&-withdrawals/payments-charges/what-fees-does-groww-charge--58
 
-Last checked:2026-10-18
+Last checked: 2026-10-18
 
 ---
 
