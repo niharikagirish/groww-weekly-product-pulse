@@ -2,6 +2,12 @@
 
 An AI-powered n8n workflow that analyses public Groww app reviews, generates a weekly product pulse, verifies fee information against official sources, and prepares follow-up actions subject to human approval.
 
+## 🎥 Project Demo
+
+[▶ Watch the 90-second demo](https://drive.google.com/file/d/1ErYfmXQZxPBXLEIhZpZkYQmeIjA9EvY_/view)
+
+A quick walkthrough of the Groww Weekly Product Pulse project, demonstrating the workflow, review analysis, fee verification, human approval, and generated outputs.
+
 ## How to Run
 
 1. Import the [main workflow](workflows/GROWW%20Weekly%20Product%20Pulse.json) and [MCP server workflow](workflows/MCP%20server.json) into n8n.
